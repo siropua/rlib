@@ -1,0 +1,7 @@
+[7 jan 2008]
+
++ ->setTitle($pageTitle) задает заголовок страницы. По сути - просто устанавливает переменную #page_title# в сматри. Сделано для семантики.
++ ->initDatePicker() - подключает все необходимые JS и CSS для работы даты-пикера: http://www.kelvinluck.com/assets/jquery/datePicker/v2/demo/
++ ->initTinyMCE() подключает все необходимые JS для работы визуального редактора TinyMCE (gz-версия) http://tinymce.moxiecode.com/
++ ->initjQUI() подключает все необходимые библиотеки для jQuery UI: http://ui.jquery.com/
++ ->assign_sql($var, $sql) передает в смарти результаты запроса $sql под именем переменной $var

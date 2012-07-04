@@ -1,0 +1,11 @@
+[18 nov 2007] v.1.2
++ HASH_METHOD renamed to PASSWORD_HASH_METHOD and now working. 
+	Can be: md5, md5x2, md5sha1. Default is md5
+	
++ string getCookiePrefix()
+
++ bool getByID(int id)
+
+* _getUserLogin renamed to getByLogin
+
++ string iartUser::_selectStr added. can be redefined in child classes
