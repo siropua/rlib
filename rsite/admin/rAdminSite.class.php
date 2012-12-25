@@ -1,7 +1,8 @@
 <?php
 
 
-require_once 'rlib/rSite.class.php';
+require_once 'rlib/rsite/rSite.class.php';
+require_once 'rlib/rsite/admin/RACStruct.php';
 
 if(!defined('ADMIN_JS_URL'))
 	define('ADMIN_JS_URL', ADMIN_URL.'js/');
@@ -9,7 +10,7 @@ if(!defined('ADMIN_JS_URL'))
 if(!defined('ADMIN_DESIGN'))
 	define('ADMIN_DESIGN', ADMIN_URL.'templates/');
 
-class rSiteAdmin extends rSite{
+abstract class rAdminSite extends rSite{
 
 	protected $menu = array();
 
@@ -19,16 +20,22 @@ class rSiteAdmin extends rSite{
 	
 	protected $titlePathSeparator = ' / ';
 
-	function __construct($tpl, $db, $user, $_LANG, $_MENU){
-		$tpl->template_dir = ADMIN_PATH .'/templates/';
-		parent::__construct($tpl, $db, $user, $_LANG);
-		$this->menu = $_MENU;
+	function __construct($app){
+		$app->tpl->template_dir = ADMIN_PATH .'/templates/';
+		parent::__construct($app);
+		
+		$this->menu = $this->getUserMenu();
+
+		$this->assign('_ADMIN_MENU', $this->menu);
+
 		$this->tpl->template_dir = ADMIN_PATH .'/templates/';
-		$tpl->assign('ADMIN_URL', ADMIN_URL);
-		$tpl->assign('ADMIN_DESIGN', ADMIN_DESIGN);
-		$tpl->assign('ADMIN_IMG', ADMIN_DESIGN.'img/');
+		$this->assign('ADMIN_URL', ADMIN_URL);
+		$this->assign('ADMIN_DESIGN', ADMIN_DESIGN);
+		$this->assign('ADMIN_IMG', ADMIN_DESIGN.'img/');
 		$this->setTemplatesFolder(ADMIN_PATH .'/templates');
 		$this->assign('ADMIN_JS', ADMIN_JS_URL);
+
+		$this->setContainer(ENGINE_PATH.'/admin/index-topmenu.tpl');
 	}
 
 	/******** SELECTORS *****************************/
@@ -173,39 +180,8 @@ class rSiteAdmin extends rSite{
 	* Returns user menu depending on user rights
 	*/
 	function getUserMenu(){
-		$menu = array();
-
-
-		foreach($this->menu as $sURL => $sInfo)
-		{
-
-			if(@!$sInfo['modules'] ||  // no modules in section
-				!$this->user->can('admin/'.$sURL) ) // user can't view section
-					continue;
-
-			if(@$sInfo['hidden'] || @$sInfo['disabled'])
-				continue;
-
-			$menu[$sURL] = $sInfo;
-			$menu[$sURL]['url'] = MODULES_URL . $sURL;
-			$menu[$sURL]['modules'] = array();
-			foreach($sInfo['modules'] as $mURL => $mInfo)
-			{
-				if(!$this->user->can('admin/'.$sURL.'/'.$mURL))
-					continue;
-				if(@$mInfo['hidden'] || @$mInfo['disabled'])
-					continue;
-
-				//echo 'admin/'.$sURL.'/'.$mURL.'<br>';
-
-				$menu[$sURL]['modules'][$mURL] = $mInfo;
-				$menu[$sURL]['modules'][$mURL]['url'] = $menu[$sURL]['url'] . '/' . $mURL;
-			}
-		}
-		
-		$this->updateMenu($menu);
-		
-		return $menu;
+		$menu = new RACMenuWorker;
+		return $menu->getUserMenu($this->user);
 	}
 	
 	// interface
@@ -295,6 +271,17 @@ class rSiteAdmin extends rSite{
 	function getModulePath(){
 		if(!$this->curModule) return false;
 		return MODULES_PATH."/".$this->curSection."/".$this->curModule;
+	}
+
+
+
+	/**
+		MENU WORKING
+	**/
+
+	public function parseModules($forceReload = false){
+		$menu = new RACMenuWorker;
+		return $menu->parseModules($forceReload);
 	}
 
 

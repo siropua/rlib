@@ -27,13 +27,11 @@ class RACStruct{
 
 	var $_modified = false;
 
-	/**
-     * Constructor
-     * @access protected
-     */
-	function RACStruct($admin_path = '')
+
+	public function __construct($admin_path = '')
 	{
 		$this->_basePath = realpath($admin_path ? $admin_path : ROOT.'/admin');
+
 		$this->_configReader = new Config_File();
 	}
 
@@ -50,8 +48,10 @@ class RACStruct{
 			return $this->_sections;
 
 		$this->_sections = array();
-		foreach(glob($this->_basePath.'/modules/*', GLOB_ONLYDIR) as $s)
+
+		foreach(glob($this->_basePath.'/*', GLOB_ONLYDIR) as $s)
 		{
+
 			###### cvs fix #########
 			if(basename($s) == 'CVS') continue;
 
@@ -61,12 +61,15 @@ class RACStruct{
 			/** section disabled **/
 			if(file_exists($s.'/disabled')) continue;
 
-			$conf = $this->_configReader->get($s.'/config.ini', '');
+			$conf = $this->_configReader->get($s.'/config.ini');
 			if(!$conf || !@$conf['name']) continue;
 
-			$this->_sections[basename($s)] = $conf['name'];
+			$this->_sections[basename($s)] = $conf;
 		}
 		$this->_modified = false;
+
+
+
 		return $this->_sections;
 	}
 
@@ -129,6 +132,7 @@ class RACStruct{
 	 **/
 	function getModules($section, $force_refresh = false)
 	{
+
 		$section = trim($section);
 
 		if(!count($this->_sections) && !$this->getSections(true))
@@ -142,8 +146,8 @@ class RACStruct{
 
 
 		// begin scanning sections dir
-		$this->_struct[$section] = array();
-		foreach(glob($this->_basePath.'/modules/'.$section.'/*', GLOB_ONLYDIR) as $s)
+		$this->_struct[$section] = $this->_sections[$section];
+		foreach(glob($this->_basePath.'/'.$section.'/*', GLOB_ONLYDIR) as $s)
 		{
 			###### cvs fix #########
 			if(basename($s) == 'CVS') continue;
@@ -161,7 +165,19 @@ class RACStruct{
 			
 			$conf['rights'] = $this->_configReader->get($config_file, 'rights');
 
-			$this->_struct[$section][basename($s)] = $conf['name'];
+			/** tabs **/
+			$tabs = $this->_configReader->get_section_names($config_file);
+			foreach ($tabs as $tab_name){
+				if(!preg_match("/^tab_(.*)$/i", $tab_name, $tab_info))
+					continue;
+				$tab_config = $this->_configReader->get($config_file, $tab_info[0]);
+				if(empty($tab_config['name']))
+					continue;
+				$conf['tabs'][$tab_info[1]] = $tab_config;
+			}
+
+
+			$this->_struct[$section]['modules'][basename($s)] = $conf;
 		}
 
 		return $this->_struct[$section];
@@ -175,10 +191,11 @@ class RACStruct{
 	function getAllModules()
 	{
 		$this->getSections(true);
-		foreach($this->_sections as $s)
+		foreach($this->_sections as $s => $conf)
 		{
 			$this->getModules($s, true);
 		}
+		
 		return $this->_struct;
 	}
 
@@ -280,6 +297,101 @@ class RACStruct{
 		}
 
 		return false;
+	}
+
+
+}
+
+
+
+class RACMenuWorker{
+
+
+	public function parseModules($forceReload = false){
+
+		$struct = new RACStruct(ENGINE_PATH.'/admin/modules');
+		$globalMenu = $struct->getAllModules();
+		$localURL = ROOT_URL.SITE_FOLDER.'/'.ADMIN_FOLDER.'/';
+		$globalURL = ROOT_URL.ENGINE_FOLDER.'/'.ADMIN_FOLDER.'/modules/';
+		foreach ($globalMenu as $key => $value) {
+			if(!empty($value['icon'])) 
+				$globalMenu[$key]['icon'] = $globalURL.$key.'/'.$value['icon'];
+			if(!empty($value['modules']))
+				foreach ($value['modules'] as $mk => $mv) {
+					if(!empty($mv['icon']))
+						$globalMenu[$key]['modules'][$mk]['icon'] = $globalURL.$key.'/'.$mk.'/'.$mv['icon'];
+				}
+		}
+
+		$struct = new RACStruct(SITE_PATH.'/admin');
+		$localMenu = $struct->getAllModules();
+
+		$menu = $globalMenu;
+
+		foreach ($localMenu as $sk => $sv){
+
+			if(!empty($sv['icon'])) 
+				$localMenu[$sk]['icon'] = $localURL.$sk.'/'.$sv['icon'];
+			if(!empty($sv['modules']))
+				foreach ($sv['modules'] as $mk => $mv) {
+					if(!empty($mv['icon']))
+						$localMenu[$sk]['modules'][$mk]['icon'] = $localURL.$sk.'/'.$mk.'/'.$mv['icon'];
+				}
+
+
+			if(!empty($sv['overwrite']) || empty($menu[$sk])){ // тупо заменяем и идем дальше
+				$menu[$sk] = $localMenu[$sk];
+				continue;
+			}
+
+			foreach ($sv['modules'] as $mk => $mv) {
+				$menu[$sk]['modules'][$mk] = $localMenu[$sk]['modules'][$mk];
+			}
+
+		}
+
+		return $menu;
+	}
+
+
+	/**
+	* Returns user menu depending on user rights
+	*/
+	function getUserMenu(rUser $user, $fullMenu = array()){
+		$menu = array();
+
+		if(!$fullMenu)
+			$fullMenu = $this->parseModules();
+
+		foreach($fullMenu as $sURL => $sInfo)
+		{
+
+			if(@!$sInfo['modules'] ||  // no modules in section
+				!$user->can('admin/'.$sURL) ) // user can't view section
+					continue;
+
+			if(@$sInfo['hidden'] || @$sInfo['disabled'])
+				continue;
+
+			$menu[$sURL] = $sInfo;
+			$menu[$sURL]['url'] = ADMIN_MODULES_URL . $sURL;
+			$menu[$sURL]['modules'] = array();
+			foreach($sInfo['modules'] as $mURL => $mInfo)
+			{
+				if(!$user->can('admin/'.$sURL.'/'.$mURL))
+					continue;
+				if(@$mInfo['hidden'] || @$mInfo['disabled'])
+					continue;
+
+				//echo 'admin/'.$sURL.'/'.$mURL.'<br>';
+
+				$menu[$sURL]['modules'][$mURL] = $mInfo;
+				$menu[$sURL]['modules'][$mURL]['url'] = $menu[$sURL]['url'] . '/' . $mURL;
+			}
+		}
+		
+		
+		return $menu;
 	}
 
 

@@ -56,6 +56,9 @@ class rBlog{
 	protected $prefix = 'blog';
 	
 	protected $hasModeration = false;
+
+
+	protected $blogData = array();
 	
 	/**
 	* __construct
@@ -870,7 +873,12 @@ class rBlog{
 		}
 		$this->blogID = $blog['id'];
 		$this->tagsObj->setFilterID($blog['id']);
+		$this->blogData = $blog;
 		return $blog;
+	}
+
+	public function selectedBlog(){
+		return $this->blogData;
 	}
 	
 	/** удаляем блог
