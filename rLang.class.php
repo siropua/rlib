@@ -17,6 +17,8 @@ class rLang{
 	var $_langPath;
 
 	var $smarty = null;
+
+	protected $curLang = 'ru';
 	
 	protected $baseFiles = array();
 	
@@ -83,5 +85,10 @@ class rLang{
 		{
 			return $this->_lang[$idx];
 		}
+	}
+
+
+	public function getCurLang(){
+		return $this->curLang;
 	}
 }
