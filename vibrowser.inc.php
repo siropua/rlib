@@ -10,6 +10,7 @@ define("FORM_SELECT_OPTION",    2);
 
 define("POST_TYPE_SIMPLE",      1);
 define("POST_TYPE_MULTIPART",   2);
+define("POST_TYPE_JSON",   3);
 
 define("VIBROWSER_DEFAULT_TIMEOUT",     120);
 define("VIBROWSER_CONNECT_TIMEOUT",     120);
@@ -188,6 +189,11 @@ class ViBrowser
     public function setAJAXMode($isAJAX = true)
     {
         $this->session->setAJAXMode($isAJAX);
+    }
+
+    public function setAdditionalHeaders($headers)
+    {
+        $this->session->setAdditionalHeaders($headers);
     }
 
     function Get($url)
@@ -493,7 +499,7 @@ class ViBrowser
                     $field["type"] == "image")
                 continue;*/
             
-            if(!isset($field['value'])) continue;
+            //if(!isset($field['value'])) continue;
 
             if(is_array($field["value"]))
             {
@@ -646,6 +652,7 @@ class HTTP_Session
     var $debug_callback;
     var $last_error;
     var $server_time;
+    protected $addHeaders = array();
 
     protected $isAJAX = false;
 
@@ -664,6 +671,11 @@ class HTTP_Session
         $this->debug_callback = false;
         $this->last_error = "";
         $this->server_time = array();
+    }
+
+    public function setAdditionalHeaders($headers)
+    {
+        $this->addHeaders = $headers;
     }
 
     function setDebugCallback($func_name)
@@ -1073,11 +1085,11 @@ class HTTP_Session
         if($this->user_agent)
             $req_headers[] = "User-Agent: $this->user_agent";
         $req_headers[] = "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5";
-        $req_headers[] = "Accept-Language: en-us,en;q=0.5";
+        $req_headers[] = "Accept-Language: ru-ru,ru;q=0.8,en-us;q=0.5,en;q=0.3";
         if($this->use_compression)
             $req_headers[] = "Accept-Encoding: gzip,deflate";
-        $req_headers[] = "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7";
-        $req_headers[] = "Keep-Alive: $this->keep_alive";
+        // $req_headers[] = "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7";
+        // $req_headers[] = "Keep-Alive: $this->keep_alive";
 
         $req_headers[] = "Connection: keep-alive";
         if($this->url)
@@ -1087,8 +1099,16 @@ class HTTP_Session
         if($cookie_string)
             $req_headers[] = "Cookie: $cookie_string";
 
-        if(is_array($data) && $type == POST_TYPE_SIMPLE)
+        if(is_array($this->addHeaders) && !empty($this->addHeaders))
+            foreach ($this->addHeaders as $hdr) {
+                $req_headers[] = $hdr;
+            }
+
+
+        if(is_array($data) && ($type == POST_TYPE_SIMPLE || $type == POST_TYPE_JSON))
         {
+
+            $req_headers[] = 'Expect:';
             
             $post_data = "";
             foreach($data as $var => $value)
@@ -1104,8 +1124,13 @@ class HTTP_Session
                     $post_data .= urlencode($var)."=".urlencode($value);
             }
             
-            //$post_data = http_build_query($data);
-            $req_headers[] = "Content-Type: application/x-www-form-urlencoded";
+            $post_data = http_build_query($data);
+            if($type == POST_TYPE_JSON){
+                $req_headers[] = "Content-Type: application/json; charset=utf-8";
+               
+            }else{
+                $req_headers[] = "Content-Type: application/x-www-form-urlencoded";
+            }
             $req_headers[] = "Content-Length: ".strlen($post_data);
 
         }
@@ -1114,13 +1139,18 @@ class HTTP_Session
             $post_data = $data;
             if(!is_array($data))
             {
-                $req_headers[] = "Content-Type: application/x-www-form-urlencoded";
+                if($type == POST_TYPE_JSON){
+                    $req_headers[] = "Content-Type: application/json; charset=utf-8";
+                }else{
+                    $req_headers[] = "Content-Type: application/x-www-form-urlencoded";
+                }
                 $req_headers[] = "Content-Length: ".strlen($post_data);
             }
         }
 
         if($this->debug_callback)
         {
+            
             foreach($req_headers as $str) $this->debug($str);
             if(is_array($post_data))
             {
