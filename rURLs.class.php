@@ -21,7 +21,7 @@ class rURLs{
 	}
 
 	function translit_iconv($text){
-		return iconv("utf-8", "us-ascii//TRANSLIT", $text);
+		return @iconv("utf-8", "us-ascii//TRANSLIT", $text);
 	}
 
 	public static function translit_func($string){
