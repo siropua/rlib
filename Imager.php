@@ -446,7 +446,7 @@ class Imager {
 
                     if (!$destination = $this->prepareDestination($destination))
                         return array('error' => $this->_lastError);
-
+                    $shift_x = $shift_y = 0;
                     if ($this->need2resize()) {
                         if ($this->_useIM) {
                             list($shift_x, $shift_y, $crop_w, $crop_h, $width, $height) = $this->getCroppedDimsIM();
@@ -495,7 +495,10 @@ class Imager {
                         $width = $this->_imgW;
                         $height = $this->_imgH;
                     }
-                    return array("error" => false, "destination" => $destination, "width" => $width, "height" => $height);
+                    return array("error" => false, "destination" => $destination, "width" => $width, "height" => $height, 
+                        'resize_percent' => array('shift' => array('x' => $shift_x / $this->_imgW, 'y' => $shift_y / $this->_imgH),
+                        'size' => array('width' => $width / $this->_imgW, 'height' => $height / $this->_imgH))
+                        );
                 }
                 
                 /**
