@@ -446,7 +446,7 @@ class Imager {
 
                     if (!$destination = $this->prepareDestination($destination))
                         return array('error' => $this->_lastError);
-                    $shift_x = $shift_y = 0;
+                    $shift_x = $shift_y = $crop_w = $crop_h = 0;
                     if ($this->need2resize()) {
                         if ($this->_useIM) {
                             list($shift_x, $shift_y, $crop_w, $crop_h, $width, $height) = $this->getCroppedDimsIM();
@@ -496,9 +496,50 @@ class Imager {
                         $height = $this->_imgH;
                     }
                     return array("error" => false, "destination" => $destination, "width" => $width, "height" => $height, 
-                        'resize_percent' => array('shift' => array('x' => $shift_x / $this->_imgW, 'y' => $shift_y / $this->_imgH),
-                        'size' => array('width' => $width / $this->_imgW, 'height' => $height / $this->_imgH))
-                        );
+                        'resize_percent' => array(
+                            'shift' => array('x' => $shift_x / $this->_imgW, 'y' => $shift_y / $this->_imgH),
+                            'size' => array('width' => ($crop_w ? $crop_w : $width) / $this->_imgW, 'height' => ($crop_h ? $crop_h : $height) / $this->_imgH),
+                            'crop' => array('width' => $crop_w / $this->_imgW, 'height' => $crop_h / $this->_imgH)
+                        )
+                    );
+                }
+
+
+                /**
+                * @var $destination
+                * @var $startX
+                * @var $startY
+                */
+                public function saveCropPercent($destination, $startX, $startY, $wP, $hP, $w, $h)
+                {
+                    if(!$this->_useIM) throw new Exception('GD not supported yet');
+
+                    $sX = floor($startX * $this->_imgW);
+                    $sY = floor($startY * $this->_imgH);
+
+                    $wPpx = floor($wP * $this->_imgW);
+                    $hPpx = floor($hP * $this->_imgH);
+
+
+                    $command = IMAGEMAGICK_PATH . 
+                        "convert " . $this->_path . ($this->getExt() == 'gif' ? '[0]' : '') .
+                        " -crop {$wPpx}x{$hPpx}+$sX+$sY " .
+                        " -resize {$w}x{$h} ".
+                        " " .   $destination;
+                    
+                    $reply = system($command);
+
+                    if (!file_exists($destination)) {
+                        return array("error" => $this->lang[ERR_CANT_OUTPUT] . " IMAGEMAGICK: $reply");
+                    }
+
+                    return array("error" => false, "destination" => $destination, "width" => $w, "height" => $h, 
+                        'resize_percent' => array(
+                            'shift' => array('x' => $startX, 'y' => $startY),
+                            'size' => array('width' => $wP, 'height' => $hP),
+                            'crop' => array('width' => $wP, 'height' => $hP)
+                        )
+                    );
                 }
                 
                 /**
