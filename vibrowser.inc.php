@@ -27,9 +27,8 @@ define("PROXY_TYPE_SOCKS", CURLPROXY_SOCKS5);
  *
  */
 
-if (!function_exists('gzdecode'))
-{
-    function gzdecode($data)
+
+    function gzdecode2($data)
     {
         // Check if data is GZIP'ed
         if (strlen($data) < 18 || strcmp(substr($data,0,2),"\x1f\x8b"))
@@ -43,7 +42,7 @@ if (!function_exists('gzdecode'))
         // Return regular data
         return @gzinflate($data);
     }
-}
+
 
 /*
  * ViBrowser class
@@ -181,7 +180,7 @@ class ViBrowser
         return $this->session->getRedirect();
     }
 
-    function fix_link($link, $url)
+    static function fix_link($link, $url)
     {
         return HTTP_Session::fix_link($link, $url);
     }
@@ -932,7 +931,7 @@ class HTTP_Session
         $this->redirect = "";
 
         curl_exec($ch);
-        $body = gzdecode($body);
+        $body = gzdecode2($body);
         $this->debug("\n$headers");
         if(curl_errno($ch))
         {
@@ -1201,7 +1200,7 @@ class HTTP_Session
         }
         $this->headers = $headers;
         $this->debug("\n$headers");
-        $this->body = gzdecode($body);
+        $this->body = gzdecode2($body);
 
         curl_close ($ch);
 
@@ -1220,7 +1219,7 @@ class HTTP_Session
      * transforms relative links to full URL with http|https:// etc
      */
 
-    function fix_link($link, $url)
+    static function fix_link($link, $url)
     {
         $res = $link;
 
