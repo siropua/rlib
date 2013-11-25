@@ -1430,7 +1430,7 @@ class rBlogPost
 		$this->blog = $rBlog;
 		$this->db = $rBlog->db;
 		if(!$this->getByID($postID))
-			throw new Exception('Cant get post '.$postID);
+			throw new Exception('Cant get post #'.$postID);
 	}
 
 
@@ -1441,9 +1441,15 @@ class rBlogPost
 	**/
 	public function getByID($id)
 	{
-		$this->data = $this->db->selectRow('SELECT p.* 
-			FROM blog_posts p 
+		$this->data = $this->db->selectRow('SELECT p.*, b.name AS blog_name, b.url AS blog_url, u.full_name AS author_name,
+					img.filename as mainpic_filename
+					FROM blog_posts p
+					LEFT JOIN blogs b ON b.id = p.blog_id
+					LEFT JOIN users u ON u.id = p.owner_id
+					LEFT JOIN blog_images img ON img.id = p.mainpic_id
+
 			WHERE p.id = ?d', $id);
+		if(!$this->data) return false;
 		$this->id = $this->data['id'];
 		$this->data = $this->proceedPost($this->data);
 			
@@ -1488,6 +1494,13 @@ class rBlogPost
 		if(!empty($post['tags_cache'])){
 			$post['tags'] = @unserialize($post['tags_cache']);
 		}
+
+		if(empty($post['blog_url'])){
+			echo 'cant find blog url';
+			print_r($post);
+			exit;
+		}
+
 		$post['post_url'] = ROOT_URL.$post['blog_url'].'/'.$post['url'].'.html';
 
 		return $post;
