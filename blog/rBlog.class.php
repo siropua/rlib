@@ -357,6 +357,7 @@ class rBlog{
 	function getByID($postID){
 		$post = $this->db->selectRow($this->getSetting('selectPosts').' WHERE p.id = ?d', $postID);
 		$post = $this->proceedPost($post);
+
 		return $post;
 	}
 
@@ -439,8 +440,9 @@ class rBlog{
 	function proceedPost($post, $picPrefix = ''){
 		if(!$post) return false;
 		if(!empty($post['tags_cache'])) $post['tags_cache'] = @unserialize($post['tags_cache']);
-		$this->getPostURL($post);
-		$this->getPostMainpic($post, $picPrefix);
+		//$this->getPostURL($post);
+		//$this->getPostMainpic($post, $picPrefix);
+		$post = rBlogPost::proceedPost($post);
 		return $post;
 	}
 
@@ -590,7 +592,7 @@ class rBlog{
 		
 		foreach($r['posts'] as $n=>$v){
 			$r['posts'][$n] = $this->proceedPost($v);
-			$r['posts'][$n] = rBlogPost::proceedPost($v);
+			//$r['posts'][$n] = rBlogPost::proceedPost($r['posts'][$n]);
 		}
 		
 		$r['total'] = $total;
@@ -974,11 +976,13 @@ class rBlog{
 					LEFT JOIN blog_favorites fav ON (fav.post_id = p.id AND fav.user_id = '.$this->app->user->getID().')',
 
 			'selectByTag' =>
-				'SELECT p.*, b.name AS blog_name, b.url AS blog_url, u.full_name AS author_name, fav.dateadd AS in_favorites
+				'SELECT p.*, b.name AS blog_name, b.url AS blog_url, u.full_name AS author_name, fav.dateadd AS in_favorites,
+					img.filename as mainpic_filename
 					FROM blog_tags_map tmap
 					LEFT JOIN blog_posts p ON p.id = tmap.entry_id
 					LEFT JOIN blogs b ON b.id = p.blog_id
 					LEFT JOIN users u ON u.id = p.owner_id
+					LEFT JOIN blog_images img ON img.id = p.mainpic_id
 					LEFT JOIN blog_favorites fav ON (fav.post_id = p.id AND fav.user_id = '.$this->app->user->getID().')',
 
 			'selectFavorited' =>
