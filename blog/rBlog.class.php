@@ -611,7 +611,7 @@ class rBlog{
 		if(!$limit)
 			$limit = $this->getSetting('onPage');
 		
-		$r = $this->db->select($this->getSetting('selectPosts').' WHERE p.status = "posted" AND visible = 1{ AND p.rating >= ?}{ AND p.rating <= ?}{ AND p.blog_id = ?d}{ AND p.owner_id = ?d} ORDER BY p.datepost DESC LIMIT '.$limit,
+		$r = $this->db->select($this->getSetting('selectPosts').' WHERE p.status = "posted" AND p.visible = 1{ AND p.rating >= ?}{ AND p.rating <= ?}{ AND p.blog_id = ?d}{ AND p.owner_id = ?d} ORDER BY p.datepost DESC LIMIT '.$limit,
 			$this->getSetting('ratingLimit', false) !== false ? $this->getSetting('ratingLimit', 0) : DBSIMPLE_SKIP,
 			$this->getSetting('ratingTopLimit', false) !== false ? $this->getSetting('ratingTopLimit', 0) : DBSIMPLE_SKIP,
 			$this->blogID ? $this->blogID : DBSIMPLE_SKIP,
