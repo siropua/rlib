@@ -436,12 +436,10 @@ class rBlog{
 	* @param mixed $post
 	* @param string $picPrefix
 	* @return mixed
+	* @todo избавится от этого метода
 	*/
 	function proceedPost($post, $picPrefix = ''){
 		if(!$post) return false;
-		if(!empty($post['tags_cache'])) $post['tags_cache'] = @unserialize($post['tags_cache']);
-		//$this->getPostURL($post);
-		//$this->getPostMainpic($post, $picPrefix);
 		$post = rBlogPost::proceedPost($post);
 		return $post;
 	}
