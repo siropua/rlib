@@ -1483,6 +1483,10 @@ class rBlogPost
 	{
 		$post['res_url'] = self::getURL($post);
 		$post['res_path'] = self::getPath($post);
+		if(!empty($post['tags_cache'])){
+			$post['tags'] = @unserialize($post['tags_cache']);
+		}
+		$post['post_url'] = ROOT_URL.$post['blog_url'].'/'.$post['url'].'.html';
 
 		return $post;
 	}
