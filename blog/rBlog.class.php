@@ -168,10 +168,6 @@ class rBlog{
 			$this->tagsObj->setEntryID(0);
         }
 
-        $this->blogsDB->inc('posts', $this->blogID);
-
-
-
 		return new rBlogPost($this, $postID);
 	}
 	
@@ -858,6 +854,11 @@ class rBlog{
 		$this->tagsObj->setFilterID($blog['id']);
 		return $blog;
 	}
+
+	public function selectedBlog()
+	{
+		return $this->blogID;
+	}
 	
 	/** удаляем блог
 	* пока только пустые блоги
@@ -1416,6 +1417,9 @@ class rBlogPost
 	protected $blog = NULL;
 	protected $data = array();
 	protected $db = NULL;
+	protected $table = NULL;
+
+	protected $tagsObj = null;
 
 
 	protected $picSizes = array(
@@ -1431,6 +1435,7 @@ class rBlogPost
 		$this->db = $rBlog->db;
 		if(!$this->getByID($postID))
 			throw new Exception('Cant get post #'.$postID);
+		$this->table = new rTableClass($this->db, 'blog_posts');
 	}
 
 
@@ -1452,9 +1457,21 @@ class rBlogPost
 		if(!$this->data) return false;
 		$this->id = $this->data['id'];
 		$this->data = $this->proceedPost($this->data);
+		$this->data['pics'] = $this->getPics();
 			
 		return $this->data;	
 
+	}
+
+	static public function getByURL(rBlog $blog, $url)
+	{
+		$postID = $blog->db->selectCell('SELECT id FROM blog_posts WHERE url = ?{AND blog_id = ?d}',
+			$url, $blog->selectedBlog() ? $blog->selectedBlog() : DBSIMPLE_SKIP
+			);
+
+		if(!$postID) return false;
+		$c = get_called_class();
+		return new $c($blog, $postID);
 	}
 
 
@@ -1496,16 +1513,18 @@ class rBlogPost
 		}
 
 		if(empty($post['blog_url'])){
-			echo 'cant find blog url';
-			print_r($post);
-			exit;
+			$post['blog_url'] = '';
 		}
 
-		$post['post_url'] = ROOT_URL.$post['blog_url'].'/'.$post['url'].'.html';
+		$post['post_url'] = ROOT_URL.($post['blog_url'] ? $post['blog_url'].'/' : '').$post['url'].'.html';
 
 		return $post;
 	}
 
+
+	/**
+		Картинки
+	**/
 
 
 	/**
@@ -1540,16 +1559,95 @@ class rBlogPost
 		if(!$this->data['mainpic_id'])
 			$this->setField('mainpic_id', $attachID);
 
+		$this->setField('attached_pics', $this->db->selectCell('SELECT COUNT(*) FROM blog_images WHERE post_id = ?d', $this->id));
+
 		return array(
 			'basename' => $base_name,
 		);
 
 	}
 
+	public function deAttachPic($id)
+	{
+		if(!$pic = $this->db->selectRow('SELECT * FROM blog_images WHERE id = ?d', $id))
+			return false;
+
+		if($pic['post_id'] != $this->id)
+			return false;
+
+		if($this->mainpic_id == $pic['id']){
+			$anotherPic = $this->db->selectCell('SELECT id FROM blog_images 
+				WHERE post_id = ?d AND id <> ?d LIMIT 1', $this->id, $id);
+			$this->setField('mainpic_id', intval($anotherPic));
+		}
+
+		$this->db->query('DELETE FROM blog_images WHERE id = ?d', $id);
+		foreach ($this->picSizes as $pS) {
+			@unlink($this->res_path.'/'.$pS['prefix'].$pic['filename']);
+		}
+
+		$this->setField('attached_pics', $this->db->selectCell('SELECT COUNT(*) FROM blog_images WHERE post_id = ?d', $this->id));
+
+		return true;
+
+	}
+
+
+	public function getPics()
+	{
+		$pics = $this->db->select('SELECT * FROM blog_images WHERE post_id = ?d', $this->id);
+
+		return $pics;
+	}
+
+
+	/**
+
+	**/
+
 
 	public function setField($field, $value)
 	{
 		$this->db->query('UPDATE blog_posts SET ?# = ? WHERE id = ?d', $field, $value, $this->id);
+	}
+
+
+	public function delete()
+	{
+		if(!empty($this->data['tags_cache'])){
+			$tagsObj = new Tags($this->db, 'blog');
+			$tagsObj->setEntryID($this->data['id']);
+			$tagsObj->clear();
+			$tagsObj->setEntryID(0);
+		}
+
+
+		$this->table->remove($this->data['id']);
+
+		if($this->res_path){
+			$files = glob($this->res_path.'/*');
+			foreach ($files as $f) {
+				@unlink($f);
+			}
+			@rmdir($this->res_path);
+		}
+
+		return true;
+
+	}
+
+
+	/** in php5 we can use $user->field_name for read any user fields */
+	/**
+	* rUser::__get()
+	* @param mixed $field
+	* @return mixed
+	*/
+	function __get($field)
+	{
+		/* if(!$this->authed())
+			return null; */
+		return @$this->data[$field];
 	}
 
 

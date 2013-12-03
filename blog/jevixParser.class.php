@@ -20,10 +20,10 @@ class jevixParser{
 
 	protected function init(){
 		$this->j->cfgAllowTags(array(
-			'b', 'i', 'u', 's', 'ul', 'li', 'p', 'img', 'code', 'div', 'a', 'pre', 'strong'
+			'b', 'i', 'u', 's', 'ul', 'li', 'p', 'img', 'code', 'div', 'a', 'pre', 'strong', 'br'
 		));
 		$this->j->cfgSetTagShort(array(
-			'img'
+			'img', 'br'
 		));
 		$this->j->cfgSetXHTMLMode(false);
 		$this->j->cfgSetTagNoTypography('pre');
