@@ -41,6 +41,7 @@ class jevixParser{
 		$this->j->cfgAllowTagParams('code', array(
 			'class'
 		));
+		$this->j->cfgSetAutoBrMode(false);
 	}
 
 	public function parse($text){
