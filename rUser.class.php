@@ -190,28 +190,29 @@ class rUser{
 
 		$this->_ID = (int)$this->_data['id'];
 
+		$this->saveAuthData($save_time);
+
+		return LOGIN_OK;
+	}
+
+	public function saveAuthData($save_time = 0)
+	{
+
 		$_COOKIE[$this->_cookie_prefix.'uid'] =
 			$_SESSION[$this->_cookie_prefix.'uid'] = $this->_data['id'];
 		$_COOKIE[$this->_cookie_prefix.'hash'] =
 			$_SESSION[$this->_cookie_prefix.'hash'] = $this->_data[PASS_FIELD];
 
-		/*if($this->_cookie_domain && false){
-			setcookie($this->_cookie_prefix.'uid', $this->_data['id'], $save_time, $this->_cookie_path, $this->_cookie_domain);
-			setcookie($this->_cookie_prefix.'uid', $this->_data['id'], $save_time, $this->_cookie_path, '.'.$this->_cookie_domain);
 
-			setcookie($this->_cookie_prefix.'hash', $this->_data[PASS_FIELD], $save_time, $this->_cookie_path, $this->_cookie_domain);
-			setcookie($this->_cookie_prefix.'hash', $this->_data[PASS_FIELD], $save_time, $this->_cookie_path, '.'.$this->_cookie_domain);
-		}else{*/
-			setcookie($this->_cookie_prefix.'uid', $this->_data['id'], $save_time, $this->_cookie_path);
-			setcookie($this->_cookie_prefix.'hash', $this->_data[PASS_FIELD], $save_time, $this->_cookie_path);
-		// }
+		setcookie($this->_cookie_prefix.'uid', $this->_data['id'], $save_time, $this->_cookie_path);
+		setcookie($this->_cookie_prefix.'hash', $this->_data[PASS_FIELD], $save_time, $this->_cookie_path);
+
 
 		$this->_db->query('UPDATE ?# SET ip = ?, last_login = ? WHERE id = ?',
 			USERS_TABLE, $this->getIP(), time(), $this->_ID);
 
 		$this->auth();
-
-		return LOGIN_OK;
+		
 	}
 
 	/**
