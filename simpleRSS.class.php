@@ -58,6 +58,11 @@
 			//flush data
 			$this->items = array();
 		}
+
+		public function setOptions($opt)
+		{
+			$this->optional = array_merge($this->optional, $opt);
+		}
 		
 		
 		/**
@@ -209,4 +214,3 @@
 			return $out; 
 		}
 	}
-?>
