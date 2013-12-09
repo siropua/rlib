@@ -1549,11 +1549,16 @@ class rBlogPost
 		
 		@unlink($file['tmp_name']);
 
+		$ordr = intval($this->db->selectCell('SELECT MAX(ordr) FROM blog_images WHERE post_id = ?d', 
+			$this->id));
+		$ordr++;
+
 		$attachID = $this->db->query('INSERT INTO blog_images SET ?a', array(
 			'post_Id' => $this->id,
 			'dateadd' => time(),
 			'filename' => $base_name,
 			'original_name' => $file['name'],
+			'ordr' => $ordr,
 		));
 
 		if(!$this->data['mainpic_id'])
@@ -1586,6 +1591,9 @@ class rBlogPost
 			@unlink($this->res_path.'/'.$pS['prefix'].$pic['filename']);
 		}
 
+		$this->db->query('UPDATE blog_images SET ordr = ordr - 1 WHERE post_id = ?d AND ordr > ?d',
+			$this->id, $pic['ordr']);
+
 		$this->setField('attached_pics', $this->db->selectCell('SELECT COUNT(*) FROM blog_images WHERE post_id = ?d', $this->id));
 
 		return true;
@@ -1595,7 +1603,7 @@ class rBlogPost
 
 	public function getPics()
 	{
-		$pics = $this->db->select('SELECT * FROM blog_images WHERE post_id = ?d', $this->id);
+		$pics = $this->db->select('SELECT * FROM blog_images WHERE post_id = ?d ORDER BY ordr', $this->id);
 
 		return $pics;
 	}
