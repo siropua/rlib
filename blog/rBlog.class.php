@@ -1424,7 +1424,8 @@ class rBlogPost
 
 	protected $picSizes = array(
 		'original' => array('prefix' => 'o-', 'w' => 1280, 'h' => 20000, 'assign_as_next' => true),
-		'base' => array('prefix' => '', 'w' => 860, 'h' => 10000),
+		'base' => array('prefix' => '', 'w' => 860, 'h' => 10000, 'assign_as_next'),
+		'index' => array('prefix' => 'i-', 'w' => 600, 'h' => 1000),
 		'thumb' => array('prefix' => 't-', 'w' => 140, 'h' => 100, 'method' => 'crop'),
 	
 	);
