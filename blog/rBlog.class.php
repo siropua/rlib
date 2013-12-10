@@ -112,13 +112,17 @@ class rBlog{
 			'dateadd' => time(),
 			'datepost' => time(),
 			'lastmodified' => time(),
-			'preview' => $data['preview'],
+			'preview' => $this->process_text($data['preview']),
+			'resume' => $this->process_text(@$data['resume']),
 			'text' => $this->process_text($data['text']),
 		);
 		if(strip_tags($data['preview'])) $post_data['have_cut'] = 1;
 		
 		if(isset($data['visible']))
 			$post_data['visible'] = (int)$data['visible'];
+
+		if(!empty($data['author_rating']))
+			$post_data['author_rating'] = intval($post_data['author_rating']);
 		
 		$post_data['allow_comments'] = isset($data['allow_comments']) ? (int)$data['allow_comments'] : 1;
 		if(!empty($data['disable_comments'])) $post_data['allow_comments'] = 0;
@@ -213,29 +217,29 @@ class rBlog{
 		
 		if(isset($data['source_url'])) $post_data['source_url'] = trim($data['source_url']);
 		
-		$cutPos = strpos($data['text'], $this->getSetting('cutTag'));
-		if($cutPos !== FALSE){
-			/*// есть кат. растовошиваем тексты
-			$data['text'] = preg_replace('~<[pdiv]+[^>]*>\s*'.preg_quote($this->getSetting('cutTag'), '~').'\s*</[pdiv]+>~', '', $data['text']);
-			$post_data['text'] = $this->process_text(rtrim(substr($data['text'], 0, $cutPos), ' <'));
-			$post_data['full_text'] = $this->process_text(str_replace($this->getSetting('cutTag'), '', $data['text']));
-			$post_data['have_cut'] = 1;*/
-		}else{
-			// без ката
-			
-			//print_r(array_map('htmlspecialchars', $post_data)); exit;
-			
-			$post_data['text'] = $this->process_text($data['text']);
-		}
+
+		$post_data['text'] = $this->process_text($data['text']);
 		
-		if(!empty($data['preview'])){
-			$data['preview'] = preg_replace('~^<[^>]+>(\s*|<br[^>]+>|&nbsp;)*</[^>]+>$~i', '', trim($data['preview']));
+		
+		if(isset($data['preview'])){
+			//$data['preview'] = preg_replace('~^<[^>]+>(\s*|<br[^>]+>|&nbsp;)*</[^>]+>$~i', '', trim($data['preview']));
 			
-			if($data['preview']){			
-				$post_data['preview'] = $this->process_text($data['preview']);
+			$post_data['preview'] = $this->process_text($data['preview']);
+
+			if($post_data['preview']){			
 				$post_data['have_cut'] = 1;
 			}
 		}
+		
+		if(isset($data['resume'])){
+			$post_data['resume'] = $this->process_text($data['resume']);
+		}
+
+		if(!empty($data['author_rating']))
+			$post_data['author_rating'] = intval($data['author_rating']);
+		else
+			$post_data['author_rating'] = NULL;
+
 		
 		//$post_data['status'] = 'posted';
 		if(!empty($data['status']))
