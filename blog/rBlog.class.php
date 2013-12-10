@@ -1271,6 +1271,7 @@ class rBlog{
 		WHERE p.status = "posted"
 		LIMIT 5000', 
 			$this->settings['posts_table'], $this->settings['blogs_table']);
+
 	}
 	
 	/**
@@ -1517,9 +1518,14 @@ class rBlogPost
 			$post['blog_url'] = '';
 		}
 
-		$post['post_url'] = ROOT_URL.($post['blog_url'] ? $post['blog_url'].'/' : '').$post['url'].'.html';
+		$post['post_url'] = self::getPostURL(array('blog_url' => $post['blog_url'], 'url' => $post['url']));
 
 		return $post;
+	}
+
+	public function getPostURL($post)
+	{
+		return ROOT_URL.($post['blog_url'] ? $post['blog_url'].'/' : '').$post['url'].'.html';
 	}
 
 
