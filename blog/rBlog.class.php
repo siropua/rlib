@@ -1523,7 +1523,7 @@ class rBlogPost
 		return $post;
 	}
 
-	public function getPostURL($post)
+	static public function getPostURL($post)
 	{
 		return ROOT_URL.($post['blog_url'] ? $post['blog_url'].'/' : '').$post['url'].'.html';
 	}
