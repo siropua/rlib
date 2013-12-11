@@ -364,7 +364,7 @@ class Imager {
                     list($width, $height) = $this->getResizedDims();
                     if ($this->_useIM) {
                         
-                        $command = IMAGEMAGICK_PATH . "convert " . " -" . ($width * $height < 250000?"thumbnail":"resize") . " " . $width . "x" . $height .
+                        $command = IMAGEMAGICK_PATH . "convert " . " -" . ($width * $height < 100000?"thumbnail":"resize") . " " . $width . "x" . $height .
                             ($quality != DEF_JPG_QUALITY?" -quality $quality":"") . " " . $this->_path;
                         $ext = $this->getExt();
                         if($ext && $ext == 'gif' && substr($destination, -3) != 'gif')
