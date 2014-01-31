@@ -1311,6 +1311,10 @@ function _vibrowser_tailmatch($big, $little)
         return false;
     }
 
+    if(!$big || !$little){
+        return $big == $little;
+    }
+
     $tail = substr($big, $start, strlen($little));
     if($tail != $little)
     {
