@@ -12,6 +12,7 @@ define("POST_TYPE_SIMPLE",      1);
 define("POST_TYPE_MULTIPART",   2);
 define("POST_TYPE_JSON",   3);
 
+
 define("VIBROWSER_DEFAULT_TIMEOUT",     120);
 define("VIBROWSER_CONNECT_TIMEOUT",     120);
 define("VIBROWSER_KEEP_ALIVE",          300);
@@ -59,7 +60,7 @@ class ViBrowser
 
     protected $isAJAX = false;
 
-    function ViBrowser()
+    function __construct()
     {
         $this->session = NULL;
         $this->Reset();
@@ -1080,13 +1081,14 @@ class HTTP_Session
         $u = parse_url($url);
         $host = $u['host'];
         $this->domain = $host;
-        $req_headers = array("Host: $host");
+        $req_headers = array("Host: $host", 'Origin: http://'.$host);
         if($this->user_agent)
             $req_headers[] = "User-Agent: $this->user_agent";
-        $req_headers[] = "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5";
+//        $req_headers[] = "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5";
+        $req_headers[] = "Accept: */*";
         $req_headers[] = "Accept-Language: ru-ru,ru;q=0.8,en-us;q=0.5,en;q=0.3";
         if($this->use_compression)
-            $req_headers[] = "Accept-Encoding: gzip,deflate";
+            $req_headers[] = "Accept-Encoding: gzip,deflate,sdch";
         // $req_headers[] = "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7";
         // $req_headers[] = "Keep-Alive: $this->keep_alive";
 
@@ -1098,6 +1100,9 @@ class HTTP_Session
         if($cookie_string)
             $req_headers[] = "Cookie: $cookie_string";
 
+        if($this->isAJAX)
+            $req_headers[] = "X-Requested-With: XMLHttpRequest";        
+
         if(is_array($this->addHeaders) && !empty($this->addHeaders))
             foreach ($this->addHeaders as $hdr) {
                 $req_headers[] = $hdr;
@@ -1107,7 +1112,7 @@ class HTTP_Session
         if(is_array($data) && ($type == POST_TYPE_SIMPLE || $type == POST_TYPE_JSON))
         {
 
-            $req_headers[] = 'Expect:';
+            //$req_headers[] = 'Expect:';
             
             $post_data = "";
             foreach($data as $var => $value)
@@ -1124,11 +1129,12 @@ class HTTP_Session
             }
             
             $post_data = http_build_query($data);
+            //echo "'$post_data'";
             if($type == POST_TYPE_JSON){
                 $req_headers[] = "Content-Type: application/json; charset=utf-8";
                
             }else{
-                $req_headers[] = "Content-Type: application/x-www-form-urlencoded";
+                $req_headers[] = "Content-Type: application/x-www-form-urlencoded; charset=UTF-8";
             }
             $req_headers[] = "Content-Length: ".strlen($post_data);
 
@@ -1318,5 +1324,3 @@ function _vibrowser_tailmatch($big, $little)
 
     return true;
 }
-
-?>
