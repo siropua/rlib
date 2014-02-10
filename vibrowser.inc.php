@@ -815,7 +815,7 @@ class HTTP_Session
                 continue;
             if(preg_match('/^\s*#/', $cookie))
                 continue;
-            list($domain, $bool, $path, $secure, $expires, $name,
+            @list($domain, $bool, $path, $secure, $expires, $name,
                  $value) = @explode("\t", $cookie);
             $this->setSessionCookie($name, $value, $expires, $path, $domain, $secure);
         }
