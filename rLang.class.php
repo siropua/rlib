@@ -20,18 +20,46 @@ class rLang{
 
 	protected $curLang = 'ru';
 	
-	protected $baseFiles = array();
+	protected $baseFiles = array('all.ini');
+	protected $db = NULL;
 	
 	/**
 	 * Constructor
 	 * @access protected
 	 */
-	function __construct($lang_dir, $smarty = null)
+	function __construct($lang_dir, $smarty = null, $db = null)
 	{
 		$this->_langPath = rtrim($lang_dir, '\ /').'/';
 		$this->_langReader = new Config_File();
         if(AUTOLANG_FILE)
 			$this->addLang(AUTOLANG_FILE);
+		$this->db = $db;
+	}
+
+	public function setDB($db)
+	{
+		$this->db = $db;
+	}
+
+	public function loadIDs()
+	{
+		$this->IDs = @$this->db->selectCol('SELECT code AS ARRAY_KEY, id FROM langs');
+	}
+
+	public function getID($langName)
+	{
+		return empty($this->IDs[$langName]) ? false : $this->IDs[$langName];
+	}
+	
+	
+	public function getIDs()
+	{
+	    return $this->IDs;
+	}
+	
+	public function getSysLangs()
+	{
+	    return $this->db->select('SELECT * FROM langs');
 	}
 
 
@@ -66,6 +94,7 @@ class rLang{
 	    $this->baseFiles = $this->_langFiles = array();
 	    $this->_langPath = LANG_PATH .'/'. $lang.'/';
 	    foreach($baseFiles as $file) $this->addLang($file);
+	    $this->curLang = $lang;
 	}
 
 
@@ -91,4 +120,14 @@ class rLang{
 	public function getCurLang(){
 		return $this->curLang;
 	}
+	
+	public function getCurID(){
+	    return $this->getID($this->getCurLang());
+	}
+	
+	public function setCurLang($langStr){
+	    $this->curLang = $langStr;
+	}
+	
+	
 }
