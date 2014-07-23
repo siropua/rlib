@@ -541,6 +541,28 @@ class Imager {
                         )
                     );
                 }
+
+                public function makeRound($destination)
+                {
+
+                    if (!$destination = $this->prepareDestination($destination))
+                        return array('error' => $this->_lastError);
+
+                    $destination = preg_replace('~\.[a-z]{3,4}$~', '', $destination).'.png';
+
+                    $radius = floor(min($this->_imgW, $this->_imgH) / 2);
+
+                    $command = IMAGEMAGICK_PATH .
+                        "convert ".$this->_path." \( +clone -threshold -1 -negate -fill white -draw \"circle $radius,$radius $radius,1\" \) -alpha off -compose copy_opacity -composite ".$destination;
+
+                    $reply = system($command);
+
+                    if (!file_exists($destination)) {
+                        return array("error" => $this->lang[ERR_CANT_OUTPUT] . " IMAGEMAGICK: $reply");
+                    }
+
+                    return array("error" => false, "destination" => $destination, "width" => $radius*2, "height" => $radius * 2 );
+                }
                 
                 /**
                 * пакетное создание кучи изображений
