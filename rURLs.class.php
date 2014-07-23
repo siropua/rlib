@@ -4,7 +4,7 @@ class rURLs{
 
 	private $use_iconv = false;
 	private $maxLength = 50;
-	protected $langsAvaiable = array('ru', 'en', 'ua');
+	protected $langsAvaiable = array('ru', 'en', 'ua', 'pl');
 	protected $curLang = 'ru';
 
 	function __construct($use_iconv = false){
