@@ -305,6 +305,10 @@ class rURLs{
 		
 		return '/'.$lang.$link;
 	}	
+	
+	public function getAvaiableLangs(){
+		return $this->langsAvaiable;
+	}
 
 
 	public function getHost(){
