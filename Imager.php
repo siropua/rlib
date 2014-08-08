@@ -265,7 +265,10 @@ class Imager {
         if (!$destination = $this->prepareDestination($destination)) {
                 return array('error' => $this->_lastError);
         }
-        return copy($this->_path, $destination);
+        if (!copy($this->_path, $destination)) {
+                return array('error' => 'Can\'t save result');
+        }
+        return array("error" => false, "destination" => $destination, "width" => $width, "height" => $height);
      }
 
     /**
