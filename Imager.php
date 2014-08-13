@@ -268,7 +268,7 @@ class Imager {
         if (!copy($this->_path, $destination)) {
                 return array('error' => 'Can\'t save result');
         }
-        return array("error" => false, "destination" => $destination, "width" => $width, "height" => $height);
+        return array("error" => false, "destination" => $destination, "width" => $this->_imgW, "height" => $this->_imgH);
      }
 
     /**
