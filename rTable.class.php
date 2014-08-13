@@ -19,7 +19,7 @@ class rTableClass
 		
 		if(is_array($id)){
 			$w = array();
-			foreach($id as $n=>$v) $w[] = "`$n` = '".mysql_real_escape_string($v)."'";
+			foreach($id as $n=>$v) $w[] = "`$n` = '".mysqli_real_escape_string($v)."'";
 			$w = implode(' AND ', $w);
 			return $this->db->selectRow('SELECT * FROM ?# WHERE '.$w.' LIMIT 1', 
 			$this->table);
