@@ -95,7 +95,17 @@ class rSiteNotifier implements Debug_ErrorHook_INotifier{
             );
         }else $noticeText = $title;
 
-        echo $noticeText;
+
+        if(defined('IS_JSON_MODE') && IS_JSON_MODE)
+        {
+            echo json_encode(array(
+                'status' => '503',
+                'error_msg' => $title,
+                'data' => $body,
+            ));
+            exit;
+        }else
+            echo $noticeText;
 
         if($is500) exit;
     }

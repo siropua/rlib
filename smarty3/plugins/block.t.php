@@ -119,6 +119,7 @@ function smarty_block_t($params, $text) {
 		if (isset($domain)) {
 			$text = dgettext($domain, $text);
 		} else {
+//			echo $text, ' ';
 			$text = gettext($text);
 		}
 	}
