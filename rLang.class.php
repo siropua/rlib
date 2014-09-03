@@ -59,7 +59,7 @@ class rLang{
 	
 	public function getSysLangs()
 	{
-	    return $this->db->select('SELECT * FROM langs');
+	    return $this->db->select('SELECT *, code AS ARRAY_KEY FROM langs');
 	}
 
 

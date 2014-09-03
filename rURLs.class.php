@@ -4,7 +4,7 @@ class rURLs{
 
 	private $use_iconv = false;
 	private $maxLength = 50;
-	protected $langsAvaiable = array('ru', 'en', 'ua', 'pl');
+	protected $langsAvaiable = array('ru', 'en', 'ua');
 	protected $curLang = 'ru';
 
 	function __construct($use_iconv = false){
@@ -12,6 +12,10 @@ class rURLs{
 		$this->parseURI();
 	}
 
+
+	function setAvaiableLangs($langs){
+		$this->langsAvaiable = $langs;
+	}
 
 	function translit($text){
 
@@ -305,6 +309,10 @@ class rURLs{
 		
 		return '/'.$lang.$link;
 	}	
+	
+	public function getAvaiableLangs(){
+		return $this->langsAvaiable;
+	}
 
 
 	public function getHost(){

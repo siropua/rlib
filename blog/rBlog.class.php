@@ -259,6 +259,11 @@ class rBlog{
 			$this->tagsObj->clear();
 			$post_data['tags_cache'] = $this->tagsObj->addTags($data['tags'], $this->app->user->getID());
         }
+        
+        
+    		if(!empty($data['status']) && ($data['status'] == 'posted') && ($post['status'] == 'draft')){
+    		    $post_data['url'] = $this->getURL($data['title'], $post['id']);
+    		}
 
 		$this->postsDB->put($postID, $post_data);
 
@@ -824,10 +829,10 @@ class rBlog{
 	* @param mixed $title
 	* @return mixed
 	*/
-	function getURL($title){
+	function getURL($title, $curID = 0){
 		$url = $this->URL->URLize($title);
 		if(!$url || $url == '-') $url = str_replace('.', '-', uniqid('post', true));
-		return $this->searchURL($url);
+		return $this->searchURL($url, $curID);
 	}
 
 	/**
