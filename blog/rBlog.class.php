@@ -845,7 +845,7 @@ class rBlog{
 		}else{
 			$where = 'list_id = ' . ((int)$listID);
 		}
-		return @$this->blogsDB->getList($where);
+		return @$this->blogsDB->getList($where, 'ordr');
 	}
 
 	function selectBlog($url){
