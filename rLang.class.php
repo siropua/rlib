@@ -125,8 +125,20 @@ class rLang{
 	    return $this->getID($this->getCurLang());
 	}
 	
+	public function getEditLang(){
+		return !empty($_GET['lang']) ? $_GET['lang'] : $this->curLang;
+	}
+	
+	public function getEditID(){
+	    return $this->getID($this->getEditLang());
+	}
+	
 	public function setCurLang($langStr){
 	    $this->curLang = $langStr;
+	}
+	
+	public function setEditLang($langStr){
+	    $_GET['lang'] = $langStr;
 	}
 	
 	
