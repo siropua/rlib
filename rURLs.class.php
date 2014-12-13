@@ -1,11 +1,14 @@
 <?php
 
+if (!defined('DEF_LANG'))
+	define('DEF_LANG', 'ru');
+
 class rURLs{
 
 	private $use_iconv = false;
 	private $maxLength = 50;
 	protected $langsAvaiable = array('ru', 'en', 'uk');
-	protected $curLang = 'ru';
+	protected $curLang = DEF_LANG;
 
 	function __construct($use_iconv = false){
 		$this->use_iconv = (bool)$use_iconv;

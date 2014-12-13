@@ -5,6 +5,10 @@
 if(!class_exists('Config_File'))
 	require_once('rlib/quicky/Config_File.class.php');
 
+
+if (!defined('DEF_LANG'))
+	define('DEF_LANG', 'ru');
+
 class rLang{
 	/** @var $_lang array Storage for langs */
 	var $_lang = array();
@@ -18,7 +22,7 @@ class rLang{
 
 	var $smarty = null;
 
-	protected $curLang = 'ru';
+	protected $curLang = DEF_LANG;
 	
 	protected $baseFiles = array('all.ini');
 	protected $db = NULL;
