@@ -1,11 +1,19 @@
 <?php
 
 
+/***
+
+Example:
+
+$pager = new simplePager(20, $_GET['page'], '?page=//PAGE//')
+
+**/
+
 class simplePager{
 	
 	var $onPage = 20;
 	var $curPage = 1;
-	var $linkTpl = '?page={%PAGE%}';
+	var $linkTpl = '?page=//PAGE//';
 	var $visible_pages = 2;
 	protected $forceGapOnPages = false;
 	var $use_gaps = true;
@@ -26,7 +34,7 @@ class simplePager{
 	* @param string $link
 	* @return void
 	*/
-	function simplePager($onPage = 20, $curPage = 1, $link = '?page={%PAGE%}'){
+	function simplePager($onPage = 20, $curPage = 1, $link = '?page=//PAGE//'){
 		$this->setOnPage($onPage);
 		$this->setCurPage($curPage);
 		$this->setLink($link);
@@ -52,7 +60,7 @@ class simplePager{
 	}
 	
 	/**
-	* Устанавливает шаблон ссылки. {%PAGE%} - замениться на текущую страницу
+	* Устанавливает шаблон ссылки. //PAGE// - замениться на текущую страницу
 	* @param mixed $link
 	* @return void
 	*/
@@ -206,7 +214,7 @@ class simplePager{
 	}
 	
 	/**
-	* arraySlice
+	* 
 	* @param int $itemsCount
 	* @return mixed
 	*/
@@ -230,7 +238,7 @@ class simplePager{
 		if(($this->curPage > 1) && $this->showPrevNext)
 		{
 			$res_str .= "<a rel='prev' class='prevPage' href=\"".
-				str_replace("{%PAGE%}", $this->curPage - 1, $this->linkTpl).
+				str_replace("//PAGE//", $this->curPage - 1, $this->linkTpl).
 				"\">&larr;</a>" . $this->delimiter;
 		}
 
@@ -261,14 +269,14 @@ class simplePager{
 
 			}
 
-			$res_str .= "<a class='".($i == $this->curPage ? 'curPage' : 'pageN')."' href=\"".str_replace("{%PAGE%}", $i, $this->linkTpl)."\">$i</a>".$this->delimiter;
+			$res_str .= "<a class='".($i == $this->curPage ? 'curPage' : 'pageN')."' href=\"".str_replace("//PAGE//", $i, $this->linkTpl)."\">$i</a>".$this->delimiter;
 			
 		}
 		
 		// NEXT
 		if(($this->curPage < $pagesCount) && $this->showPrevNext)
 		{
-			$res_str .= "<a rel='next' class='nextPage' href=\"".str_replace("{%PAGE%}", $this->curPage + 1, $this->linkTpl)."\">&rarr;</a>";
+			$res_str .= "<a rel='next' class='nextPage' href=\"".str_replace("//PAGE//", $this->curPage + 1, $this->linkTpl)."\">&rarr;</a>";
 		}
 
 		$l = strlen($this->delimiter);
@@ -276,6 +284,98 @@ class simplePager{
 		if(substr($res_str, -$l) == $this->delimiter){
 			$res_str = substr($res_str, 0, -$l);
 		}
+		
+		
+		return $res_str;
+	} // getPagesStr
+	
+	/**
+	* 
+	* @param int $itemsCount
+	* @return mixed
+	*/
+	function getBootstrapPages($itemsCount = 0)
+	{
+		
+		if($itemsCount)
+			$this->setItemsCount($itemsCount);
+		
+		if(!$this->_totalItems) return "";
+		
+		if($this->_totalItems <= $this->onPage)	return "";
+
+		$pagesCount = $this->getPagesCount();
+		
+		if($pagesCount < 2) return '';
+
+
+
+
+
+		$res_str = '<nav>
+  <ul class="pagination">';
+
+		// PREV
+		if(($this->curPage > 1) && $this->showPrevNext)
+		{
+			$res_str .= '<li>
+      <a href="'.str_replace("//PAGE//", $this->curPage - 1, $this->linkTpl).'" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+      </a>
+    </li>';
+
+			
+		}
+
+		$calc_gaps = $this->use_gaps && $this->needPagesGap();
+		$gaps = $calc_gaps ? $this->calcGaps($this->curPage) : array();
+		$showed_1st_gap = $showed_2nd_gap = false;
+
+		// PAGES
+		
+		for($i=1; $i <= $pagesCount; $i++)
+		{
+			if($calc_gaps)
+			{
+				if(!$showed_1st_gap && $gaps[1]['length'] && $i == $gaps[1]['start'])
+				{
+					$showed_1st_gap = true;
+					$i += $gaps[1]['length'] - 2;
+					$res_str .= '<li>...</li>';
+					continue;
+				}
+				if(!$showed_2nd_gap && $gaps[2]['length'] && $i == $gaps[2]['start'])
+				{
+					$showed_2nd_gap = true;
+					$i += $gaps[2]['length'] - 1;
+					$res_str .= '<li>...</li>';
+					continue;
+				}
+
+			}
+
+			$res_str .= "<li><a class='".($i == $this->curPage ? 'curPage' : 'pageN')."' href=\"".str_replace("//PAGE//", $i, $this->linkTpl)."\">$i</a></li>";
+			
+		}
+		
+		// NEXT
+		if(($this->curPage < $pagesCount) && $this->showPrevNext)
+		{
+			$res_str .= '<li>
+      <a href="'.str_replace("//PAGE//", $this->curPage + 1, $this->linkTpl).'" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+      </a>
+    </li>';
+			
+		}
+
+		$l = strlen($this->delimiter);
+		
+		if(substr($res_str, -$l) == $this->delimiter){
+			$res_str = substr($res_str, 0, -$l);
+		}
+
+		$res_str .= ' </ul></nav>';
 		
 		
 		return $res_str;

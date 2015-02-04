@@ -598,9 +598,10 @@ class Imager {
                     'prefix' => префикс файла
                 )
                 */
-                public function packetResize($destination, $sizes, $base_name = '', $removePrevFiles = false){
+                public function packetResize($destination, array $sizes, $base_name = '', $removePrevFiles = false){
                     if(!$this->prepareDir($destination))
-                        return false;
+                        throw new Exception('Destination dir is unavaiable', 1);
+                        
                     
                     $destination = realpath($destination);
                     
@@ -609,7 +610,8 @@ class Imager {
                         foreach($sizes as $s) @unlink($destination.'/'.(@$s['prefix']).$removePrevFiles);
                     }
                     
-                    if(!is_array($sizes)) return false;
+                    if(!is_array($sizes) || !$sizes) throw new Exception('Empty sizes array!', 1);
+                    
                     if(!$filename = $this->prepareDestination($destination.'/'.$base_name)) 
                         return false;
                     $base_name = basename($filename);
@@ -621,7 +623,7 @@ class Imager {
                             $r = $this->saveCropped($destination.'/'.$prefix.$base_name, @$size['w'], @$size['h']);
                         }
                         if(empty($r['destination'])){
-                            trigger_error('Empty desctination '.print_r($r, 1));
+                            throw new Exception('Empty desctination '.print_r($r, 1));
                             return false;
                         }
                         if(!empty($size['assign_as_next']))

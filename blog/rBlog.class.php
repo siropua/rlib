@@ -1552,6 +1552,7 @@ class rBlogPost
 		$imager = new Imager;
 
 		if(!$imager->setImage($file['tmp_name'])){
+
 			return false;
 		}
 
@@ -1560,6 +1561,8 @@ class rBlogPost
 		
 
 		if(!$base_name = $imager->packetResize($this->data['res_path'], $this->picSizes, $picName)){
+			throw new Exception('Cant packet resize!', 1);
+			
 			return false;
 		}
 		
