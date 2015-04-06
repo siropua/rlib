@@ -88,6 +88,8 @@ class rImage
 		}
 
 		$this->destinationPath = realpath($dir);
+		if(!is_writable($this->destinationPath)) throw new Exception('Destination not writable!', 1);
+		
 
 		return $this;
 	}
@@ -117,7 +119,7 @@ class rImage
 
 		// print_r($newFile);
 
-		if(!$newFile->isValid()) throw new Exception('Can\'t resize file!');
+		if(!$newFile->isValid()) throw new Exception('Can\'t resize file! ('.$reply.') ');
 		
 
 		return $newFile;

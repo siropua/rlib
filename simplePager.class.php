@@ -5,7 +5,7 @@
 
 Example:
 
-$pager = new simplePager(20, $_GET['page'], '?page=//PAGE//')
+$pager = new simplePager(20, $_GET['page'], '?page=--PAGE--')
 
 **/
 
@@ -13,7 +13,7 @@ class simplePager{
 	
 	var $onPage = 20;
 	var $curPage = 1;
-	var $linkTpl = '?page=//PAGE//';
+	var $linkTpl = '?page=--PAGE--';
 	var $visible_pages = 2;
 	protected $forceGapOnPages = false;
 	var $use_gaps = true;
@@ -34,7 +34,7 @@ class simplePager{
 	* @param string $link
 	* @return void
 	*/
-	function simplePager($onPage = 20, $curPage = 1, $link = '?page=//PAGE//'){
+	function simplePager($onPage = 20, $curPage = 1, $link = '?page=--PAGE--'){
 		$this->setOnPage($onPage);
 		$this->setCurPage($curPage);
 		$this->setLink($link);
@@ -60,7 +60,7 @@ class simplePager{
 	}
 	
 	/**
-	* Устанавливает шаблон ссылки. //PAGE// - замениться на текущую страницу
+	* Устанавливает шаблон ссылки. --PAGE-- - замениться на текущую страницу
 	* @param mixed $link
 	* @return void
 	*/
@@ -238,7 +238,7 @@ class simplePager{
 		if(($this->curPage > 1) && $this->showPrevNext)
 		{
 			$res_str .= "<a rel='prev' class='prevPage' href=\"".
-				str_replace("//PAGE//", $this->curPage - 1, $this->linkTpl).
+				str_replace("--PAGE--", $this->curPage - 1, $this->linkTpl).
 				"\">&larr;</a>" . $this->delimiter;
 		}
 
@@ -269,14 +269,14 @@ class simplePager{
 
 			}
 
-			$res_str .= "<a class='".($i == $this->curPage ? 'curPage' : 'pageN')."' href=\"".str_replace("//PAGE//", $i, $this->linkTpl)."\">$i</a>".$this->delimiter;
+			$res_str .= "<a class='".($i == $this->curPage ? 'curPage' : 'pageN')."' href=\"".str_replace("--PAGE--", $i, $this->linkTpl)."\">$i</a>".$this->delimiter;
 			
 		}
 		
 		// NEXT
 		if(($this->curPage < $pagesCount) && $this->showPrevNext)
 		{
-			$res_str .= "<a rel='next' class='nextPage' href=\"".str_replace("//PAGE//", $this->curPage + 1, $this->linkTpl)."\">&rarr;</a>";
+			$res_str .= "<a rel='next' class='nextPage' href=\"".str_replace("--PAGE--", $this->curPage + 1, $this->linkTpl)."\">&rarr;</a>";
 		}
 
 		$l = strlen($this->delimiter);
@@ -319,7 +319,7 @@ class simplePager{
 		if(($this->curPage > 1) && $this->showPrevNext)
 		{
 			$res_str .= '<li>
-      <a href="'.str_replace("//PAGE//", $this->curPage - 1, $this->linkTpl).'" aria-label="Previous">
+      <a href="'.str_replace("--PAGE--", $this->curPage - 1, $this->linkTpl).'" aria-label="Previous">
         <span aria-hidden="true">&laquo;</span>
       </a>
     </li>';
@@ -341,20 +341,20 @@ class simplePager{
 				{
 					$showed_1st_gap = true;
 					$i += $gaps[1]['length'] - 2;
-					$res_str .= '<li>...</li>';
+					$res_str .= '<li class="disabled"><span>...</span></li>';
 					continue;
 				}
 				if(!$showed_2nd_gap && $gaps[2]['length'] && $i == $gaps[2]['start'])
 				{
 					$showed_2nd_gap = true;
 					$i += $gaps[2]['length'] - 1;
-					$res_str .= '<li>...</li>';
+					$res_str .= '<li class="disabled"><span>...</span></li>';
 					continue;
 				}
 
 			}
 
-			$res_str .= "<li><a class='".($i == $this->curPage ? 'curPage' : 'pageN')."' href=\"".str_replace("//PAGE//", $i, $this->linkTpl)."\">$i</a></li>";
+			$res_str .= "<li class='".($i == $this->curPage ? 'active' : '')."'><a class='".($i == $this->curPage ? 'curPage' : 'pageN')."' href=\"".str_replace("--PAGE--", $i, $this->linkTpl)."\">$i</a></li>";
 			
 		}
 		
@@ -362,7 +362,7 @@ class simplePager{
 		if(($this->curPage < $pagesCount) && $this->showPrevNext)
 		{
 			$res_str .= '<li>
-      <a href="'.str_replace("//PAGE//", $this->curPage + 1, $this->linkTpl).'" aria-label="Next">
+      <a href="'.str_replace("--PAGE--", $this->curPage + 1, $this->linkTpl).'" aria-label="Next">
         <span aria-hidden="true">&raquo;</span>
       </a>
     </li>';
