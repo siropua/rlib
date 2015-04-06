@@ -140,6 +140,18 @@ class rLang{
 	public function setCurLang($langStr){
 	    $this->curLang = $langStr;
 	}
+
+	public function setCurLangID($id)
+	{
+	    foreach($this->IDs as $langCode => $langID)
+	    {
+		if($langID == $id)
+		{
+		    $this->setCurLang($langCode);
+		    return;
+		}
+	    }
+	}
 	
 	public function setEditLang($langStr){
 	    $_GET['lang'] = $langStr;

@@ -32,7 +32,7 @@ class rURLs{
 	}
 
 	public static function translit_func($string){
-		$string = iconv('UTF-8', 'CP1251', $string);
+		$string = @iconv('UTF-8', "CP1251//IGNORE", $string);
 
 
 		static $LettersFrom = "абвгдезиклмнопрстуфыэйхё";
