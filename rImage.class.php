@@ -32,6 +32,15 @@ class rImage
 		$this->convert = defined('IMAGEMAGICK_PATH') ? IMAGEMAGICK_PATH.'convert' : 'convert';
 		$this->destinationPath = dirname($file->getFile());
 	}
+	
+	public function setFile(rImageFile $file)
+	{
+	    if(!$file->isValid())
+		    throw new Exception('Image ('.$file->getFile().') not valid!');
+	
+	    $this->file = $file;
+	    return $this;
+	}	
 
 	/**
 	* Создает объект из готового файла
@@ -294,6 +303,10 @@ class rImageFile
 		return (bool) $this->imageSizeIdx(0);
 	}
 
+	public function filesize()
+	{
+	    return filesize($this->getFile());
+	}
 	
 	/**
 	* Возвращает ширину
