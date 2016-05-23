@@ -204,7 +204,7 @@ class comments{
 		}else
 		{
 			$level = 1;
-			$sort = $this->_db->getOne('select max(sort) from '.$this->_table.
+			$sort = $this->_db->selectCell('select max(sort) from '.$this->_table.
 				' where entry_id = '.$this->_entryID);
 
 		}
@@ -312,7 +312,7 @@ class comments{
 	            $res = $order;
 	        }
 	    }else{
-			$res = $this->_db->getOne('select sort from '.$this->_table.' where id = '.$id);
+			$res = $this->_db->selectCell('select sort from '.$this->_table.' where id = '.$id);
 
 	    }
 
@@ -405,7 +405,7 @@ class comments{
 			return false;
 
 		$v = $this->commentsCount();
-		$id = (int)$this->_db->getOne('select max(id) from '.$this->_table.' where entry_id = '.$this->_entryID);
+		$id = (int)$this->_db->selectCell('select max(id) from '.$this->_table.' where entry_id = '.$this->_entryID);
 		$res = $this->_db->query('insert into '.$this->_table.
 			'_t (user_id, entry_id, viewed, viewed_id) values ('.
 			((int)$user_id).', '.$this->_entryID.', '.$v.', '.$id.') on duplicate key update viewed = '.$v.', viewed_id = '.$id);
@@ -417,7 +417,7 @@ class comments{
 		$user_id = (int)$user_id;
 		if(!$user_id)
 			return 0;
-		$res = $this->_db->getOne('select viewed from '.$this->_table.'_t where entry_id = '.$this->_entryID.' and user_id = '.$user_id);
+		$res = $this->_db->selectCell('select viewed from '.$this->_table.'_t where entry_id = '.$this->_entryID.' and user_id = '.$user_id);
 
 		return $res;
 	}
@@ -427,7 +427,7 @@ class comments{
 		$user_id = (int)$user_id;
 		if(!$user_id)
 			return 0;
-		$res = $this->_db->getOne('select viewed_id from '.$this->_table.'_t where entry_id = '.$this->_entryID.' and user_id = '.$user_id);
+		$res = $this->_db->selectCell('select viewed_id from '.$this->_table.'_t where entry_id = '.$this->_entryID.' and user_id = '.$user_id);
 
 		return $res;
 	}
