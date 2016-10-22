@@ -23,7 +23,7 @@ class rImage
 	/**
 	Конструктор у нас protected, чтобы файл был точно существующий и валидный
 	**/
-	protected function __construct(rImageFile $file)
+	public function __construct(rImageFile $file)
 	{
 		if(!$file->isValid()) 
 			throw new Exception('Image ('.$file->getFile().') not valid!');
@@ -121,6 +121,8 @@ class rImage
 
 
 		$command .= ' '.$newFile;
+		
+//		echo $command; exit;
 
 		$reply = system($command);
 
